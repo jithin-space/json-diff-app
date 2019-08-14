@@ -19,5 +19,29 @@ export default new Router({
       // which is lazy-loaded when the route is visited.
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue'),
     },
+    {
+      path: '/projects',
+      name: 'projects',
+      component: () => import ('./views/Projects.vue'),
+    },
+    {
+
+
+          path: '/projects/:id',
+          name: 'project',
+          component: () => import('./views/Tasks.vue'),
+          // children:[
+          //     {
+          //       path:'tasks/:t_id',
+          //       name: 'task',
+          //       component: () => import('./views/TaskRun.vue'),
+          //     },
+          // ]
+    },
+    {
+      path: '/projects/:id/tasks/:t_id',
+      name: 'task',
+      component: ()=> import('./views/TaskRun.vue'),
+    },
   ],
 });
