@@ -1,31 +1,31 @@
-import { api } from '../api'
+import { api } from '../api';
 
 export default{
   namespaced: true,
-  state:{
+  state: {
     projectList: [],
   },
-  mutations:{
-    setProjects(state: any , payload: any){
+  mutations: {
+    setProjects(state: any , payload: any) {
       state.projectList = payload.projects;
     },
   },
-  getters:{
-    getProjectById: (state) => (id) => { return state.projectList.find(project => project.id === id)},
-    getProjectStatus: (state)=> (id) => { return 'Pending'},
+  getters: {
+    getProjectById: (state) => (id) => state.projectList.find((project) => project.id === id),
+    getProjectStatus: (state) => (id) => 'Pending',
   },
-  actions:{
+  actions: {
     async getProjectsApi( { commit }) {
 
-        let route = '/project';
+        const route = '/project';
         api.get(route).then(
-          (value)=>{
+          (value) => {
           console.log('success');
-          commit('setProjects',{projects: value.data})
-        }
-      ).catch((error)=>{
+          commit('setProjects', {projects: value.data});
+        },
+      ).catch((error) => {
         console.log('error');
       });
-    }
-  }
-}
+    },
+  },
+};

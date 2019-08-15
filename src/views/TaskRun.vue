@@ -7,8 +7,6 @@
 
       <div class="md-layout md-gutter">
                  <div class="md-layout-item md-size-30">
-                   <router-link :to="{ name: 'home'}"><md-button class="md-raised md-primary">Home</md-button></router-link>
-                   <router-link :to="{ name: 'project', params: { id: projectId}}"><md-button class="md-raised md-primary">All Tasks</md-button></router-link>
                  </div>
                  <div class="md-layout-item"></div>
                  <div class="md-layout-item"></div>
@@ -79,8 +77,6 @@
           </md-tab>
           <md-tab id="resolve" md-label="Resolved" v-if="resolved">
             <h1>{{resolved}}</h1>
-            <h2>{{finalPass}}</h2>
-
 
             <md-table   md-card>
                   <md-table-toolbar>
@@ -153,7 +149,7 @@ export default {
       return this.resolveCopy;
     },
     finalPass(){
-      return Object.assign({},this.runs[0].info.data,this.finalDiff);
+      return Object.assign({},this.runs[0].info.data,this.resolveCopy);
     }
   },
   mounted(){

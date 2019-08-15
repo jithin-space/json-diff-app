@@ -35,10 +35,12 @@
           <md-table-cell md-label="Document" md-sort-by="name">
             <a :href="item.info.url">view doc</a>
           </md-table-cell>
-          <md-table-cell md-label="Submissions" md-sort-by="email">{{ item.n_answers }}</md-table-cell>
-          <md-table-cell md-label="Completed" md-sort-by="gender">Yes</md-table-cell>
-          <md-table-cell md-label="Actions" md-sort-by="title">
-            <md-button @click="checkConflict(item.id)" :class="classObj(item.id)" :disabled="['conflict','ok'].includes(taskStatus[item.id])">{{taskStatus[item.id]}}</md-button>
+          <md-table-cell md-label="Submissions">{{ item.n_answers }}</md-table-cell>
+          <md-table-cell md-label="Completed" >Yes</md-table-cell>
+          <md-table-cell md-label="Actions">
+            <!-- :disabled="['conflict','ok'].includes(taskStatus[item.id])" -->
+            <md-button @click="checkConflict(item.id)" :class="classObj(item.id)" >{{taskStatus[item.id]}}</md-button>
+            <!-- <md-button class="md-primary" v-if="['conflict','ok'].includes(taskStatus[item.id])">View</md-button> -->
           </md-table-cell>
         </md-table-row>
     </md-table>
@@ -61,12 +63,17 @@ import {api} from '../store/api';
 export default {
   data: function(){
     return {
-      taskStatus: {},
-      classStatus: {}
+      classStatus: {
+        'check': {'md-raised':true},
+        'resolve':{'md-accent':true,'md-raised':true},
+        'view': {'md-primary':true,'md-raised':true},
+        'retrying...':{'md-accent':true},
+        'checking...': {'md-primary':true},
+      }
     }
   },
   computed: {
-    ...mapState('tasks',['taskList','currentProjectId']),
+    ...mapState('tasks',['taskList','currentProjectId','taskStatus']),
     ...mapGetters('tasks',['getTaskById','doneTasksCount']),
     project(){
       return this.$store.getters['projects/getProjectById'](this.currentProjectId);
@@ -95,41 +102,93 @@ export default {
     },
     conflictStatus(id){
       if(!this.taskStatus[id]){
-        this.$set(this.taskStatus,id,'check');
+        // this.$set(this.taskStatus,id,'check');
+        let temp={};
+        temp[id]='check';
+        this.$store.commit('tasks/setTaskStatus',temp);
       }
       return true;
     },
     classObj(id){
+      let temp={};
+      temp[id]='check';
       if(!this.taskStatus[id]){
-        this.$set(this.taskStatus,id,'check');
-        this.$set(this.classStatus,id,{'md-raised':true});
+        this.$store.commit('tasks/setTaskStatus',temp);
       }
-
-      return this.classStatus[id];
+      if(!this.classStatus[id]){
+          this.$set(this.classStatus,id,{});
+      }
+      return this.classStatus[this.taskStatus[id]];
     },
     checkConflict(id){
 
-     let status = this.tasksStatus;
-      this.taskStatus[id] ="checking...";
-      this.classStatus[id]['md-primary']=true;
+      // customize into a generic button
 
-       let route= '/taskrun';
-       route+=`?task_id=${id}`;
+      let status = this.tasksStatus;
+      let temp ={};
 
-       api.get(route).then((value)=>{
-          this.taskStatus[id] = (Object.keys(diff(value.data[0].info.data,value.data[1].info.data)).length === 0) ? 'ok':'conflict';
-          if(this.taskStatus[id]=== 'ok'){
-            this.classStatus[id]['md-raised']= false;
 
+      switch(this.taskStatus[id]){
+
+        case 'check':
+            //proceed with remote checking;
+            // this.taskStatus[id] ="checking...";
+            temp[id]='checking...';
+            this.$store.commit('tasks/setTaskStatus',temp);
+            this.classStatus[id]['md-primary']=true;
+            this.getRunsFromApi(id);
+            break;
+        case 'error':
+            // this.taskStatus[id] ="retrying...";
+            temp[id]='retrying...';
+            this.$store.commit('tasks/setTaskStatus',temp);
+            this.classStatus[id]['md-accent']=true;
+            this.getRunsFromApi(id);
+            break;
+        case 'view':
+            // change to view
+            this.goToTask(id);
+            break;
+        case 'resolve':
+            //change label to resolve
+            this.goToTask(id);
+            break;
           }
-          else{
-            this.classStatus[id]['md-accent']= true;
-          }
-       }).catch((error)=>{
-         this.taskStatus[id] ='error';
-         this.classStatus[id]['md-accent']=true;
-       });
-    }
+
+      },
+
+      getRunsFromApi(id){
+
+        let route= '/taskrun';
+        route+=`?task_id=${id}`;
+        let temp ={};
+
+        api.get(route).then((value)=>{
+           // this.taskStatus[id] = (Object.keys(diff(value.data[1].info.data,value.data[0].info.data)).length === -1) ? 'view':'resolve';
+          let taskStatus = (Object.keys(diff(value.data[1].info.data,value.data[0].info.data)).length === -1) ? 'view':'resolve';
+
+           this.classStatus[id]['md-raised']= true;
+           if(taskStatus === 'view'){
+             temp[id]= 'view';
+             this.$store.commit('tasks/setTaskStatus',temp);
+             this.classStatus[id]['md-raised']= true;
+           }
+           else{
+             temp[id]= 'resolve';
+             this.$store.commit('tasks/setTaskStatus',temp);
+             this.classStatus[id]['md-accent']= true;
+           }
+        }).catch((error)=>{
+          // this.taskStatus[id] ='error';
+          temp[id]= 'error';
+          this.$store.commit('tasks/setTaskStatus',temp);
+          this.classStatus[id]['md-accent']=true;
+        });
+
+      }
+
+
+
   }
 }
 </script>

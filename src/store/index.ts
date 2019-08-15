@@ -1,6 +1,6 @@
-import Vue from "vue";
-import Vuex from "vuex";
-import {api} from "./api";
+import Vue from 'vue';
+import Vuex from 'vuex';
+import {api} from './api';
 import tasksD from './dummy';
 // import taskRuns from './dummy_run';
 import projects from './modules/projects';
@@ -20,10 +20,10 @@ export default new Vuex.Store({
   },
   getters: {
   },
-  modules:{
+  modules: {
     projects,
     tasks,
-    taskruns
-  }
+    taskruns,
+  },
 
 });

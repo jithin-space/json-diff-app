@@ -41,7 +41,7 @@ export default new Router({
     {
       path: '/projects/:id/tasks/:t_id',
       name: 'task',
-      component: ()=> import('./views/TaskRun.vue'),
+      component: () => import('./views/TaskRun.vue'),
     },
   ],
 });
