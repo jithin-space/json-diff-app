@@ -1,4 +1,4 @@
-import { api } from '../api';
+import { pybossa_api,lumen_api } from '../api';
 
 export default{
   namespaced: true,
@@ -23,9 +23,8 @@ export default{
       let route = '/taskrun';
       route += `?task_id=${state.currentTaskId}`;
 
-      api.get(route).then((value) => {
+      pybossa_api.get(route).then((value) => {
         commit('setTaskRuns', value.data);
-        
       }).catch((error) => {
         console.log('fetch error');
       });

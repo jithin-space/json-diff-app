@@ -36,10 +36,10 @@
             <a :href="item.info.url">view doc</a>
           </md-table-cell>
           <md-table-cell md-label="Submissions">{{ item.n_answers }}</md-table-cell>
-          <md-table-cell md-label="Completed" >Yes</md-table-cell>
+          <md-table-cell md-label="Completed" >{{ item.state }}</md-table-cell>
           <md-table-cell md-label="Actions">
             <!-- :disabled="['conflict','ok'].includes(taskStatus[item.id])" -->
-            <md-button @click="checkConflict(item.id)" :class="classObj(item.id)" >{{taskStatus[item.id]}}</md-button>
+            <md-button @click="checkConflict(item.id)" :class="classObj(item.id)" v-show="item.state == 'completed'" >{{taskStatus[item.id]}}</md-button>
             <!-- <md-button class="md-primary" v-if="['conflict','ok'].includes(taskStatus[item.id])">View</md-button> -->
           </md-table-cell>
         </md-table-row>
@@ -59,7 +59,7 @@
 import { diffString, diff } from 'json-diff';
 import {mapState} from 'vuex';
 import { mapGetters } from 'vuex';
-import {api} from '../store/api';
+import {pybossa_api} from '../store/api';
 export default {
   data: function(){
     return {
@@ -85,6 +85,7 @@ export default {
       this.$store.commit('tasks/setCurrentProject',parseInt(this.$route.params.id));
     }
     this.$store.dispatch('tasks/getTasksFromApi');
+    this.$store.dispatch('tasks/getTasksFromLumen');
   },
   watch:{
     $route(to,from){
@@ -163,9 +164,12 @@ export default {
         route+=`?task_id=${id}`;
         let temp ={};
 
-        api.get(route).then((value)=>{
-           // this.taskStatus[id] = (Object.keys(diff(value.data[1].info.data,value.data[0].info.data)).length === -1) ? 'view':'resolve';
-          let taskStatus = (Object.keys(diff(value.data[1].info.data,value.data[0].info.data)).length === -1) ? 'view':'resolve';
+        pybossa_api.get(route).then((value)=>{
+          console.log(value.data[1].info.data);
+          console.log(value.data[0].info.data);
+          console.log(diff(value.data[0].info.data,value.data[1].info.data));
+           // console.log(Object.keys(diff(value.data[1].info.data,value.data[0].info.data)));
+          let taskStatus = (! diff(value.data[1].info.data,value.data[0].info.data)) ? 'view':'resolve';
 
            this.classStatus[id]['md-raised']= true;
            if(taskStatus === 'view'){
@@ -180,6 +184,7 @@ export default {
            }
         }).catch((error)=>{
           // this.taskStatus[id] ='error';
+          console.log(error);
           temp[id]= 'error';
           this.$store.commit('tasks/setTaskStatus',temp);
           this.classStatus[id]['md-accent']=true;

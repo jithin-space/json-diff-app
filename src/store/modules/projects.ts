@@ -1,4 +1,4 @@
-import { api } from '../api';
+import { pybossa_api,lumen_api } from '../api';
 
 export default{
   namespaced: true,
@@ -18,7 +18,7 @@ export default{
     async getProjectsApi( { commit }) {
 
         const route = '/project';
-        api.get(route).then(
+        pybossa_api.get(route).then(
           (value) => {
           console.log('success');
           commit('setProjects', {projects: value.data});
