@@ -13,7 +13,7 @@
     "core-js": "^2.6.5",
     "json-diff": "^0.5.4",
     "material-icons-font": "^1.4.2",
-    "node-sass": "^4.12.0",
+    "node-sass": "^7.0.0",
     "sass-loader": "^7.3.1",
     "typeface-roboto": "^0.0.75",
     "vue": "^2.6.10",
